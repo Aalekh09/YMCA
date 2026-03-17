@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - PYQ Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="auth-wrapper" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <i class="bi bi-shield-lock-fill text-primary" style="font-size:2.5rem;"></i>
+                <h2>Admin Portal</h2>
+                <p class="text-muted">Restricted access — Admins only</p>
+            </div>
+
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Admin Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input type="email" id="email" class="form-control" placeholder="admin@pyq.com" required>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" id="password" class="form-control" placeholder="Admin password" required>
+                    </div>
+                </div>
+
+                <div id="alertBox" class="alert d-none"></div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-dark btn-lg" id="submitBtn">
+                        <i class="bi bi-shield-check me-2"></i>Admin Login
+                    </button>
+                </div>
+            </form>
+
+            <p class="text-center mt-3">
+                <a href="/index.html" class="text-muted small"><i class="bi bi-arrow-left me-1"></i>Back to Home</a>
+            </p>
+            <div class="alert alert-info mt-3 small">
+                <i class="bi bi-info-circle me-1"></i>
+                Default: <strong>admin@pyq.com</strong> / <strong>admin123</strong>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/api.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const alertBox = document.getElementById('alertBox');
+            const btn = document.getElementById('submitBtn');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Authenticating...';
+
+            try {
+                const data = await apiPost('/auth/login', { email, password }, false);
+                if (data.role !== 'ADMIN') {
+                    throw new Error('Access denied. Not an admin account.');
+                }
+                Auth.save(data);
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                alertBox.className = 'alert alert-danger';
+                alertBox.textContent = err.message;
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-shield-check me-2"></i>Admin Login';
+            }
+        });
+    </script>
+</body>
+</html>
